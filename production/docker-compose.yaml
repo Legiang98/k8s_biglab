@@ -2,17 +2,21 @@ version: '3.8'
 
 services:
   database-mysql:
+    # image: mysql:8.0
     image: mysql:8.0
+    command: '--default-authentication-plugin=mysql_native_password'
     restart: always
     environment:
-      - MYSQL_DATABASE=gianglv6
-      - MYSQL_ROOT_PASSWORD=admin123@
+      - MYSQL_DATABASE=app_database
+      - MYSQL_ROOT_PASSWORD=admin12345$
     ports:
       - '3306:3306'
     expose: 
       - 3306
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
 
   backend:
     build:
@@ -21,7 +25,7 @@ services:
     restart: unless-stopped
     environment:
       - DB_PORT=3306
-      - DB_HOST='database-mysql'
+      - DB_HOST=database-mysql
       - URL_REACT=http://localhost
       # - DB_HOST=host.docker.internal
     ports:
@@ -30,7 +34,8 @@ services:
       - 3000
     depends_on:
       - database-mysql
-
+    networks:
+      - app-network
 
   frontend:
     build:
@@ -43,6 +48,9 @@ services:
       - 8080:80
     expose:
       - 8080
+    networks:
+      - app-network
+
 
 volumes:
   mysql_data:
