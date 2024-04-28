@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-deployment
+  namespace: dev
+  labels:
+    app: k8s_biglab
+spec:
+  replicas: 3  # You can adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: k8s_biglab
+  template:
+    metadata:
+      labels:
+        app: k8s_biglab
+    spec:
+      containers:
+      - name: frontend
+        image: giangle197/frontend 
+        ports:
+        - containerPort: 8080 
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-deployment
+  namespace: dev
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: giangle197/backend
+        resources:
+          requests:
+            cpu: 10m
+        ports:
+        - containerPort: 3000
