@@ -1,47 +1,91 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fe-deployment
+  name: frontend-deployment
   namespace: dev
   labels:
-    app: k8s_biglab
+    app: k8s-frontend
 spec:
-  replicas: 3  # You can adjust the number of replicas as needed
+  replicas: 1  # You can adjust the number of replicas as needed
   selector:
     matchLabels:
-      app: k8s_biglab
+      app: k8s-frontend
   template:
     metadata:
       labels:
-        app: k8s_biglab
+        app: k8s-frontend
     spec:
       containers:
-      - name: frontend
+      - name: k8s-frontend
         image: giangle197/frontend 
         ports:
-        - containerPort: 8080 
+        - containerPort: 80 
+        # restartPolicy: Always
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef: 
+              name: web-configmap
+              key: backend_url
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: be-deployment
+  name: backend-deployment
   namespace: dev
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
-      app: backend
+      app: k8s-backend
   template:
     metadata:
       labels:
-        app: backend
+        app: k8s-backend
     spec:
       containers:
-      - name: backend
-        image: giangle197/backend
+      - name: k8s-backend
+        image: giangle197/backend:v1
         resources:
           requests:
             cpu: 10m
         ports:
         - containerPort: 3000
+        # restartPolicy: Always
+        env:
+        - name: DbSettings__Server
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: database_url
+        - name: DbSettings__Database
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: database
+        - name: DbSettings__UserId
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: db_user
+        - name: DbSettings__Password
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: db_password
+        - name: Api__Protocol
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: api_protocol
+        - name: Api__Host
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: api_host
+        - name: Api__Port
+          valueFrom:
+            configMapKeyRef:
+              name: api-configmap
+              key: api_port
