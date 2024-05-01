@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-deployment
-  namespace: dev
+  # namespace: dev
   labels:
     app: k8s-frontend
 spec:
@@ -17,9 +17,9 @@ spec:
     spec:
       containers:
       - name: k8s-frontend
-        image: giangle197/frontend 
+        image: giangle197/todolist-fe 
         ports:
-        - containerPort: 80 
+        - containerPort: 3001 
         # restartPolicy: Always
         env:
         - name: API_URL
@@ -33,7 +33,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend-deployment
-  namespace: dev
+  # namespace: dev
 spec:
   replicas: 1
   selector:
@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: k8s-backend
-        image: giangle197/backend:v1
+        image: giangle197/todolist-be
         resources:
           requests:
             cpu: 10m
@@ -54,38 +54,38 @@ spec:
         - containerPort: 3000
         # restartPolicy: Always
         env:
-        - name: DbSettings__Server
+        - name: NODE_ENV
           valueFrom:
             configMapKeyRef:
               name: api-configmap
               key: database_url
-        - name: DbSettings__Database
+        - name: DB_DATABASE 
           valueFrom:
             configMapKeyRef:
               name: api-configmap
               key: database
-        - name: DbSettings__UserId
+        - name: DB_USERNAME 
           valueFrom:
             secretKeyRef:
               name: mysql-secret
               key: db_user
-        - name: DbSettings__Password
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysql-secret
               key: db_password
-        - name: Api__Protocol
-          valueFrom:
-            configMapKeyRef:
-              name: api-configmap
-              key: api_protocol
-        - name: Api__Host
-          valueFrom:
-            configMapKeyRef:
-              name: api-configmap
-              key: api_host
-        - name: Api__Port
-          valueFrom:
-            configMapKeyRef:
-              name: api-configmap
-              key: api_port
+        # - name: Api__Protocol
+        #   valueFrom:
+        #     configMapKeyRef:
+        #       name: api-configmap
+        #       key: api_protocol
+        # - name: Api__Host
+        #   valueFrom:
+        #     configMapKeyRef:
+        #       name: api-configmap
+        #       key: api_host
+        # - name: Api__Port
+        #   valueFrom:
+        #     configMapKeyRef:
+        #       name: api-configmap
+        #       key: api_port
